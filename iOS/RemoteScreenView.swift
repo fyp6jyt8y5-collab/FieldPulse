@@ -82,10 +82,29 @@ struct RemoteScreenView: View {
 
 struct RemoteStream: UIViewRepresentable {
     let url: URL?
-    func makeUIView(context: Context) -> WKWebView { WKWebView(frame: .zero) }
+    final class Coordinator {
+        var loadedURL: URL?
+    }
+
+    func makeCoordinator() -> Coordinator { Coordinator() }
+    func makeUIView(context: Context) -> WKWebView {
+        let webView = WKWebView(frame: .zero)
+        webView.isOpaque = false
+        webView.backgroundColor = .black
+        webView.scrollView.isScrollEnabled = false
+        webView.scrollView.bounces = false
+        return webView
+    }
     func updateUIView(_ webView: WKWebView, context: Context) {
         guard let url else { return }
-        webView.load(URLRequest(url: url))
+        guard context.coordinator.loadedURL != url else { return }
+        let escapedURL = url.absoluteString.replacingOccurrences(of: "&", with: "&amp;").replacingOccurrences(of: "\"", with: "&quot;")
+        let html = """
+        <html><head><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"></head>
+        <body style=\"margin:0;background:#000;overflow:hidden\"><img src=\"\(escapedURL)\" style=\"display:block;width:100vw;height:100vh;object-fit:cover\"></body></html>
+        """
+        context.coordinator.loadedURL = url
+        webView.loadHTMLString(html, baseURL: nil)
     }
 }
 
@@ -99,6 +118,9 @@ final class RemoteControlService: ObservableObject {
     private var lastPoint = CGPoint.zero
     private let motionManager = CMMotionManager()
     private let motionQueue = OperationQueue()
+    private var referenceAttitude: CMAttitude?
+    private var previousYaw: Double?
+    private var previousPitch: Double?
 
     var streamURL: URL? { URL(string: "http://\(host):8080/stream") }
 
@@ -111,18 +133,45 @@ final class RemoteControlService: ObservableObject {
         errorMessage = nil
     }
     func setHeadMouseEnabled(_ enabled: Bool) {
-        guard enabled else { motionManager.stopDeviceMotionUpdates(); return }
+        guard enabled else {
+            motionManager.stopDeviceMotionUpdates()
+            referenceAttitude = nil
+            previousYaw = nil
+            previousPitch = nil
+            return
+        }
         guard motionManager.isDeviceMotionAvailable else { errorMessage = "Gyroscope unavailable."; return }
         motionManager.deviceMotionUpdateInterval = 1.0 / 60.0
+        referenceAttitude = nil
+        previousYaw = nil
+        previousPitch = nil
         motionManager.startDeviceMotionUpdates(using: .xArbitraryZVertical, to: motionQueue) { [weak self] motion, _ in
             guard let motion, let self else { return }
-            let dx = abs(motion.rotationRate.y) > 0.035 ? motion.rotationRate.y * 18 : 0
-            let dy = abs(motion.rotationRate.x) > 0.035 ? motion.rotationRate.x * 18 : 0
+            guard let reference = self.referenceAttitude ?? motion.attitude else {
+                self.referenceAttitude = motion.attitude
+                return
+            }
+            if self.referenceAttitude == nil { self.referenceAttitude = reference }
+            let relative = motion.attitude.copy() as! CMAttitude
+            relative.multiply(byInverseOf: reference)
+            let yaw = relative.yaw
+            let pitch = relative.pitch
+            let lastYaw = self.previousYaw ?? yaw
+            let lastPitch = self.previousPitch ?? pitch
+            let yawDelta = Self.shortestAngle(yaw - lastYaw)
+            let pitchDelta = Self.shortestAngle(pitch - lastPitch)
+            self.previousYaw = yaw
+            self.previousPitch = pitch
+            let dx = abs(yawDelta) > 0.001 ? yawDelta * 950 : 0
+            let dy = abs(pitchDelta) > 0.001 ? -pitchDelta * 950 : 0
             Task { @MainActor in
                 self.send(MousePacket(type: "move", dx: Double(dx), dy: Double(dy)))
-                self.panoramaOffset = CGSize(width: max(-100, min(100, self.panoramaOffset.width - CGFloat(motion.rotationRate.y * 2))), height: max(-60, min(60, self.panoramaOffset.height + CGFloat(motion.rotationRate.x * 2))))
+                self.panoramaOffset = CGSize(width: max(-180, min(180, self.panoramaOffset.width - CGFloat(yawDelta * 260))), height: max(-110, min(110, self.panoramaOffset.height + CGFloat(pitchDelta * 260))))
             }
         }
+    }
+    private static func shortestAngle(_ angle: Double) -> Double {
+        atan2(sin(angle), cos(angle))
     }
     func setPanoramicEnabled(_ enabled: Bool) { if !enabled { panoramaOffset = .zero } }
     func move(dx: CGFloat, dy: CGFloat) {
@@ -132,7 +181,7 @@ final class RemoteControlService: ObservableObject {
         send(MousePacket(type: "move", dx: Double(deltaX), dy: Double(deltaY)))
     }
     func click() { lastPoint = .zero; send(MousePacket(type: "click", dx: 0, dy: 0)) }
-    func stop() { motionManager.stopDeviceMotionUpdates(); connection?.cancel(); connection = nil; isConnected = false; lastPoint = .zero; panoramaOffset = .zero }
+    func stop() { motionManager.stopDeviceMotionUpdates(); connection?.cancel(); connection = nil; isConnected = false; lastPoint = .zero; panoramaOffset = .zero; referenceAttitude = nil; previousYaw = nil; previousPitch = nil }
     private func send(_ packet: MousePacket) {
         guard let data = try? JSONEncoder().encode(packet) else { return }
         connection?.send(content: data, completion: .contentProcessed { _ in })

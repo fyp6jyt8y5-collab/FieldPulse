@@ -14,17 +14,14 @@ struct RemoteScreenView: View {
             Color.black.ignoresSafeArea()
             if remote.isConnected {
                 GeometryReader { geometry in
+                    let eyeWidth = vrMode ? geometry.size.width / 2 - 4 : geometry.size.width
                     HStack(spacing: vrMode ? 8 : 0) {
-                        RemoteStream(url: remote.streamURL)
-                            .frame(width: vrMode ? geometry.size.width / 2 - 4 : geometry.size.width, height: geometry.size.height)
+                        panoramicEye(width: eyeWidth, height: geometry.size.height, url: remote.streamURL, yaw: remote.panoramaYaw, enabled: panoramicMode)
                         if vrMode {
-                            RemoteStream(url: remote.streamURL)
-                                .frame(width: geometry.size.width / 2 - 4, height: geometry.size.height)
+                            panoramicEye(width: eyeWidth, height: geometry.size.height, url: remote.streamURL, yaw: remote.panoramaYaw, enabled: panoramicMode)
                         }
                     }
                     .frame(width: geometry.size.width, height: geometry.size.height)
-                    .scaleEffect(panoramicMode ? 1.25 : 1)
-                    .offset(panoramicMode ? remote.panoramaOffset : .zero)
                     .clipped()
                     .overlay {
                         Color.clear
@@ -43,6 +40,19 @@ struct RemoteScreenView: View {
         .persistentSystemOverlays(.hidden)
         .ignoresSafeArea()
         .onDisappear { remote.stop() }
+    }
+
+    private func panoramicEye(width: CGFloat, height: CGFloat, url: URL?, yaw: Double, enabled: Bool) -> some View {
+        let tileOffset = enabled ? -CGFloat(yaw / (.pi * 2)) * width : 0
+        return HStack(spacing: 0) {
+            ForEach(0..<5, id: \.self) { _ in
+                RemoteStream(url: url)
+                    .frame(width: width, height: height)
+            }
+        }
+        .offset(x: -2 * width + tileOffset)
+        .frame(width: width, height: height, alignment: .leading)
+        .clipped()
     }
 
     private var setupView: some View {
@@ -114,6 +124,7 @@ final class RemoteControlService: ObservableObject {
     @Published private(set) var isConnected = false
     @Published private(set) var errorMessage: String?
     @Published private(set) var panoramaOffset = CGSize.zero
+    @Published private(set) var panoramaYaw = 0.0
     private var connection: NWConnection?
     private var lastPoint = CGPoint.zero
     private let motionManager = CMMotionManager()
@@ -121,6 +132,7 @@ final class RemoteControlService: ObservableObject {
     private var referenceAttitude: CMAttitude?
     private var previousYaw: Double?
     private var previousPitch: Double?
+    private var accumulatedYaw = 0.0
 
     var streamURL: URL? { URL(string: "http://\(host):8080/stream") }
 
@@ -163,6 +175,8 @@ final class RemoteControlService: ObservableObject {
             let dy = abs(pitchDelta) > 0.001 ? -pitchDelta * 950 : 0
             Task { @MainActor in
                 self.send(MousePacket(type: "move", dx: Double(dx), dy: Double(dy)))
+                self.accumulatedYaw += yawDelta
+                self.panoramaYaw = self.accumulatedYaw
                 self.panoramaOffset = CGSize(width: max(-180, min(180, self.panoramaOffset.width - CGFloat(yawDelta * 260))), height: max(-110, min(110, self.panoramaOffset.height + CGFloat(pitchDelta * 260))))
             }
         }
@@ -170,7 +184,13 @@ final class RemoteControlService: ObservableObject {
     private static func shortestAngle(_ angle: Double) -> Double {
         atan2(sin(angle), cos(angle))
     }
-    func setPanoramicEnabled(_ enabled: Bool) { if !enabled { panoramaOffset = .zero } }
+    func setPanoramicEnabled(_ enabled: Bool) {
+        if !enabled {
+            panoramaOffset = .zero
+            panoramaYaw = 0
+            accumulatedYaw = 0
+        }
+    }
     func move(dx: CGFloat, dy: CGFloat) {
         let deltaX = dx - lastPoint.x
         let deltaY = dy - lastPoint.y
@@ -178,7 +198,7 @@ final class RemoteControlService: ObservableObject {
         send(MousePacket(type: "move", dx: Double(deltaX), dy: Double(deltaY)))
     }
     func click() { lastPoint = .zero; send(MousePacket(type: "click", dx: 0, dy: 0)) }
-    func stop() { motionManager.stopDeviceMotionUpdates(); connection?.cancel(); connection = nil; isConnected = false; lastPoint = .zero; panoramaOffset = .zero; referenceAttitude = nil; previousYaw = nil; previousPitch = nil }
+    func stop() { motionManager.stopDeviceMotionUpdates(); connection?.cancel(); connection = nil; isConnected = false; lastPoint = .zero; panoramaOffset = .zero; panoramaYaw = 0; accumulatedYaw = 0; referenceAttitude = nil; previousYaw = nil; previousPitch = nil }
     private func send(_ packet: MousePacket) {
         guard let data = try? JSONEncoder().encode(packet) else { return }
         connection?.send(content: data, completion: .contentProcessed { _ in })

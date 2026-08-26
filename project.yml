@@ -27,6 +27,18 @@ targets:
         TARGETED_DEVICE_FAMILY: "1,2"
     dependencies:
       - target: FieldPulseWatch
+  FieldPulseSideload:
+    type: application
+    platform: iOS
+    sources:
+      - path: Shared
+      - path: iOS
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: $(PRODUCT_BUNDLE_IDENTIFIER_PREFIX).fieldpulse.sideload
+        INFOPLIST_FILE: iOS/Info.plist
+        CODE_SIGN_ENTITLEMENTS: iOS/FieldPulse.entitlements
+        TARGETED_DEVICE_FAMILY: "1,2"
   FieldPulseWatch:
     type: application
     platform: watchOS
@@ -62,6 +74,10 @@ schemes:
         FieldPulse: all
         FieldPulseWatch: all
         FieldPulseWidgets: all
+  FieldPulseSideload:
+    build:
+      targets:
+        FieldPulseSideload: all
     run:
       config: Debug
     archive:

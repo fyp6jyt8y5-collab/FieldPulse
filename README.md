@@ -27,3 +27,9 @@ Generez `ExportOptions.plist` sur un Mac pour le mode choisi (`development`, `ad
 L’IPA se telecharge dans GitHub Actions > workflow run > Artifacts. Pour TestFlight, utilisez `app-store` et envoyez ensuite l’IPA avec Transporter ou une etape App Store Connect authentifiee. Sans certificat/profil Apple, aucune GitHub Action ne peut fabriquer une IPA installable : Apple exige une signature cryptographique liée à ton équipe.
 
 Depuis Windows, crée un dépôt GitHub, téléverse ce dossier, ouvre l’onglet Actions et lance `Build FieldPulse`. Le runner macOS de GitHub exécute Xcode ; tu n’as pas besoin de posséder un Mac.
+
+## SideStore sans abonnement Apple Developer
+
+Le workflow contient aussi le job `sidestore-ipa`. Il compile une version iPhone seule pour appareil réel et publie l’artefact `FieldPulse-SideStore`, qui contient `FieldPulse-SideStore.ipa`. Dans GitHub : **Actions > Build FieldPulse > Run workflow**, attends le job `sidestore-ipa`, puis télécharge cet artefact et importe l’IPA dans SideStore.
+
+Cette version ne contient pas l’app Watch et doit être resignée par SideStore avec ton compte Apple gratuit. Elle expire normalement après environ 7 jours. Les capacités nécessitant une autorisation de distribution peuvent être retirées par SideStore ; WeatherKit et App Groups peuvent donc ne pas fonctionner avec une signature gratuite.

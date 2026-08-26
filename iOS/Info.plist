@@ -7,6 +7,7 @@
 <key>CFBundlePackageType</key><string>APPL</string>
 <key>CFBundleDisplayName</key><string>FieldPulse</string>
 <key>NSLocationWhenInUseUsageDescription</key><string>FieldPulse uses your location for local weather and position details.</string>
+<key>NSLocalNetworkUsageDescription</key><string>FieldPulse connects to your Windows PC on the local network for head mouse control.</string>
 <key>WKCompanionAppBundleIdentifier</key><string>$(PRODUCT_BUNDLE_IDENTIFIER_PREFIX).fieldpulse.watchkitapp</string>
 <key>UILaunchScreen</key><dict/>
 </dict></plist>

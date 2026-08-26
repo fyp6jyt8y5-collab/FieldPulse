@@ -32,6 +32,13 @@ struct DashboardView: View {
                     Label(permissionText, systemImage: permissionSymbol)
                     Button("Update location") { location.requestPermissionAndStart() }
                 }
+                Section("PC control") {
+                    NavigationLink {
+                        HeadMouseView()
+                    } label: {
+                        Label("Head Mouse", systemImage: "dot.scope")
+                    }
+                }
                 if let error = location.errorMessage ?? weather.errorMessage { Section { Text(error).foregroundStyle(.red) } }
             }
             .navigationTitle("FieldPulse")

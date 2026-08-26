@@ -30,7 +30,7 @@ Depuis Windows, crée un dépôt GitHub, téléverse ce dossier, ouvre l’ongle
 
 ## SideStore sans abonnement Apple Developer
 
-Le workflow contient aussi le job `sidestore-ipa`. Il compile une version iPhone seule pour appareil réel et publie l’artefact `FieldPulse-HeadMouse-SideStore`, qui contient `FieldPulseHeadMouse.ipa`. Dans GitHub : **Actions > Build FieldPulse > Run workflow**, attends le job `sidestore-ipa`, puis télécharge cet artefact et importe l’IPA dans SideStore. L’app s’affiche sous le nom `FieldPulse Head Mouse` et ouvre directement l’écran `Head Mouse 2.0`. Elle utilise le Bundle ID `com.example.fieldpulse.headmouse` par défaut.
+Le workflow contient aussi le job `sidestore-ipa`. Il compile une version iPhone seule pour appareil réel et publie l’artefact `FieldPulse-HeadMouse-SideStore`, qui contient `FieldPulseRemoteScreen.ipa`. Dans GitHub : **Actions > Build FieldPulse > Run workflow**, attends le job `sidestore-ipa`, puis télécharge cet artefact et importe l’IPA dans SideStore. L’app s’affiche sous le nom `FieldPulse Remote Screen` et ouvre directement l’écran Remote Screen. Elle utilise le Bundle ID `com.example.fieldpulse.remotescreen` par défaut.
 
 Cette version ne contient pas l’app Watch et doit être resignée par SideStore avec ton compte Apple gratuit. Elle expire normalement après environ 7 jours. Pour rester compatible avec ce compte, la cible SideStore n’embarque pas les entitlements WeatherKit/App Groups ; l’écran météo peut donc rester indisponible et les complications ne sont pas incluses.
 

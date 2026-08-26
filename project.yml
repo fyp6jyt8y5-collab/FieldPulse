@@ -45,7 +45,7 @@ targets:
     settings:
       base:
         PRODUCT_NAME: FieldPulseHeadMouse
-        PRODUCT_BUNDLE_IDENTIFIER: $(PRODUCT_BUNDLE_IDENTIFIER_PREFIX).fieldpulse.headmouse
+        PRODUCT_BUNDLE_IDENTIFIER: $(PRODUCT_BUNDLE_IDENTIFIER_PREFIX).fieldpulse.remotescreen
         INFOPLIST_FILE: iOS/HeadMouseInfo.plist
         CODE_SIGN_ENTITLEMENTS: iOS/FieldPulseSideload.entitlements
         TARGETED_DEVICE_FAMILY: "1,2"

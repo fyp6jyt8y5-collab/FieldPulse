@@ -4,19 +4,18 @@ import Network
 
 struct RemoteScreenView: View {
     @StateObject private var remote = RemoteControlService()
+    @State private var vrMode = false
 
     var body: some View {
-        VStack(spacing: 12) {
-            HStack {
-                TextField("IP du PC", text: $remote.host)
-                    .textFieldStyle(.roundedBorder)
-                    .keyboardType(.numbersAndPunctuation)
-                Button(remote.isConnected ? "Stop" : "Connect") { remote.toggle() }
-                    .buttonStyle(.borderedProminent)
-            }
-            .padding(.horizontal)
+        ZStack(alignment: .top) {
+            Color.black.ignoresSafeArea()
             if remote.isConnected {
-                RemoteStream(url: remote.streamURL)
+                GeometryReader { geometry in
+                    HStack(spacing: vrMode ? 2 : 0) {
+                        RemoteStream(url: remote.streamURL)
+                        if vrMode { RemoteStream(url: remote.streamURL) }
+                    }
+                    .frame(width: geometry.size.width, height: geometry.size.height)
                     .overlay {
                         Color.clear
                             .contentShape(Rectangle())
@@ -24,15 +23,40 @@ struct RemoteScreenView: View {
                                 remote.move(dx: value.translation.width, dy: value.translation.height)
                             }.onEnded { _ in remote.click() })
                     }
-                    .clipShape(RoundedRectangle(cornerRadius: 10))
-                    .padding(.horizontal)
+                }
             } else {
-                ContentUnavailableView("PC disconnected", systemImage: "desktopcomputer")
+                setupView
             }
-            if let error = remote.errorMessage { Text(error).font(.caption).foregroundStyle(.red) }
+            controls
         }
-        .navigationTitle("Remote Screen")
+        .statusBarHidden(true)
+        .persistentSystemOverlays(.hidden)
+        .ignoresSafeArea()
         .onDisappear { remote.stop() }
+    }
+
+    private var setupView: some View {
+        VStack(spacing: 16) {
+            Image(systemName: "desktopcomputer").font(.system(size: 48)).foregroundStyle(.white)
+            TextField("IP du PC, ex. 192.168.1.20", text: $remote.host)
+                .textFieldStyle(.roundedBorder)
+                .keyboardType(.numbersAndPunctuation)
+                .frame(maxWidth: 320)
+            Button("Connecter") { remote.start() }.buttonStyle(.borderedProminent)
+            if let error = remote.errorMessage { Text(error).foregroundStyle(.red) }
+        }
+    }
+
+    private var controls: some View {
+        HStack {
+            if remote.isConnected {
+                Button("Deconnecter") { remote.stop() }.buttonStyle(.bordered)
+                Button(vrMode ? "Ecran unique" : "Mode casque VR") { vrMode.toggle() }.buttonStyle(.bordered)
+            }
+        }
+        .padding(12)
+        .foregroundStyle(.white)
+        .opacity(remote.isConnected ? 0.9 : 0)
     }
 }
 

@@ -75,7 +75,7 @@ jobs:
       - name: Upload SideStore files
         uses: actions/upload-artifact@v5
         with:
-          name: FieldPulse-HeadMouse-SideStore
+          name: FieldPulse-RemoteScreen-SideStore
           path: |
             ${{ runner.temp }}/FieldPulseRemoteScreen.ipa
             ${{ runner.temp }}/sidestore-build.log

@@ -12,6 +12,8 @@ jobs:
         run: |
           brew untap aws/tap 2>/dev/null || true
           brew install xcodegen
+      - name: Select latest Xcode
+        run: sudo xcode-select -s "$(ls -d /Applications/Xcode*.app | sort | tail -1)"
       - name: Generate project
         env:
           PRODUCT_BUNDLE_IDENTIFIER_PREFIX: ${{ vars.PRODUCT_BUNDLE_IDENTIFIER_PREFIX || 'com.example' }}

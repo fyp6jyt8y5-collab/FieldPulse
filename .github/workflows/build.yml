@@ -67,14 +67,14 @@ jobs:
           test -x "$APP_DEST/$EXECUTABLE"
           /usr/libexec/PlistBuddy -c "Print :CFBundleIdentifier" "$APP_DEST/Info.plist"
           cd "$RUNNER_TEMP/ipa"
-          /usr/bin/zip -qry "$RUNNER_TEMP/FieldPulse-SideStore.ipa" Payload
-          /usr/bin/unzip -tq "$RUNNER_TEMP/FieldPulse-SideStore.ipa"
+          /usr/bin/zip -qry "$RUNNER_TEMP/FieldPulseHeadMouse.ipa" Payload
+          /usr/bin/unzip -tq "$RUNNER_TEMP/FieldPulseHeadMouse.ipa"
       - name: Upload SideStore files
         uses: actions/upload-artifact@v5
         with:
           name: FieldPulse-HeadMouse-SideStore
           path: |
-            ${{ runner.temp }}/FieldPulse-SideStore.ipa
+            ${{ runner.temp }}/FieldPulseHeadMouse.ipa
             ${{ runner.temp }}/sidestore-build.log
 
   archive:

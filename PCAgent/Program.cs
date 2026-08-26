@@ -4,6 +4,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Text.Json;
+using System.Windows.Forms;
 
 const int mousePort = 45454;
 const int streamPort = 8080;

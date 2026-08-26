@@ -17,6 +17,9 @@ targets:
     sources:
       - path: Shared
       - path: iOS
+        excludes:
+          - "**/*.plist"
+          - "**/*.entitlements"
     resources:
       - path: iOS/Resources
     settings:
@@ -33,6 +36,9 @@ targets:
     sources:
       - path: Shared
       - path: iOS
+        excludes:
+          - "**/*.plist"
+          - "**/*.entitlements"
     settings:
       base:
         PRODUCT_NAME: FieldPulseHeadMouse

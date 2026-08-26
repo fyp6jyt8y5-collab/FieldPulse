@@ -35,6 +35,7 @@ targets:
       - path: iOS
     settings:
       base:
+        PRODUCT_NAME: FieldPulse
         PRODUCT_BUNDLE_IDENTIFIER: $(PRODUCT_BUNDLE_IDENTIFIER_PREFIX).fieldpulse.sideload
         INFOPLIST_FILE: iOS/Info.plist
         CODE_SIGN_ENTITLEMENTS: iOS/FieldPulseSideload.entitlements

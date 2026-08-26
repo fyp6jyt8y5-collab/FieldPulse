@@ -52,7 +52,10 @@ jobs:
       - name: Package IPA
         run: |
           mkdir -p "$RUNNER_TEMP/ipa/Payload"
-          ditto "$RUNNER_TEMP/device-build/FieldPulseSideload.app" "$RUNNER_TEMP/ipa/Payload/FieldPulse.app"
+          ditto "$RUNNER_TEMP/device-build/FieldPulse.app" "$RUNNER_TEMP/ipa/Payload/FieldPulse.app"
+          test -x "$RUNNER_TEMP/ipa/Payload/FieldPulse.app/FieldPulse"
+          /usr/libexec/PlistBuddy -c "Print :CFBundleExecutable" "$RUNNER_TEMP/ipa/Payload/FieldPulse.app/Info.plist"
+          /usr/libexec/PlistBuddy -c "Print :CFBundleIdentifier" "$RUNNER_TEMP/ipa/Payload/FieldPulse.app/Info.plist"
           cd "$RUNNER_TEMP/ipa"
           /usr/bin/zip -qry "$RUNNER_TEMP/FieldPulse-SideStore.ipa" Payload
           /usr/bin/unzip -tq "$RUNNER_TEMP/FieldPulse-SideStore.ipa"

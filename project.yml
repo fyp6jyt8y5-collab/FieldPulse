@@ -37,7 +37,7 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: $(PRODUCT_BUNDLE_IDENTIFIER_PREFIX).fieldpulse.sideload
         INFOPLIST_FILE: iOS/Info.plist
-        CODE_SIGN_ENTITLEMENTS: iOS/FieldPulse.entitlements
+        CODE_SIGN_ENTITLEMENTS: iOS/FieldPulseSideload.entitlements
         TARGETED_DEVICE_FAMILY: "1,2"
   FieldPulseWatch:
     type: application

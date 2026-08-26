@@ -32,4 +32,4 @@ Depuis Windows, crée un dépôt GitHub, téléverse ce dossier, ouvre l’ongle
 
 Le workflow contient aussi le job `sidestore-ipa`. Il compile une version iPhone seule pour appareil réel et publie l’artefact `FieldPulse-SideStore`, qui contient `FieldPulse-SideStore.ipa`. Dans GitHub : **Actions > Build FieldPulse > Run workflow**, attends le job `sidestore-ipa`, puis télécharge cet artefact et importe l’IPA dans SideStore.
 
-Cette version ne contient pas l’app Watch et doit être resignée par SideStore avec ton compte Apple gratuit. Elle expire normalement après environ 7 jours. Les capacités nécessitant une autorisation de distribution peuvent être retirées par SideStore ; WeatherKit et App Groups peuvent donc ne pas fonctionner avec une signature gratuite.
+Cette version ne contient pas l’app Watch et doit être resignée par SideStore avec ton compte Apple gratuit. Elle expire normalement après environ 7 jours. Pour rester compatible avec ce compte, la cible SideStore n’embarque pas les entitlements WeatherKit/App Groups ; l’écran météo peut donc rester indisponible et les complications ne sont pas incluses.

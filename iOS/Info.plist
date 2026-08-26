@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><dict>
+<key>CFBundleDisplayName</key><string>FieldPulse</string>
+<key>NSLocationWhenInUseUsageDescription</key><string>FieldPulse uses your location for local weather and position details.</string>
+<key>WKCompanionAppBundleIdentifier</key><string>$(PRODUCT_BUNDLE_IDENTIFIER_PREFIX).fieldpulse.watchkitapp</string>
+<key>UILaunchScreen</key><dict/>
+</dict></plist>

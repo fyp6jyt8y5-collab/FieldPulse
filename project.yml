@@ -1,0 +1,67 @@
+name: FieldPulse
+options:
+  bundleIdPrefix: $(PRODUCT_BUNDLE_IDENTIFIER_PREFIX)
+  deploymentTarget:
+    iOS: "17.0"
+    watchOS: "10.0"
+  createIntermediateGroups: true
+settings:
+  base:
+    SWIFT_VERSION: 5.9
+    PRODUCT_BUNDLE_IDENTIFIER_PREFIX: com.example
+    DEVELOPMENT_TEAM: ""
+targets:
+  FieldPulse:
+    type: application
+    platform: iOS
+    sources:
+      - path: Shared
+      - path: iOS
+    resources:
+      - path: iOS/Resources
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: $(PRODUCT_BUNDLE_IDENTIFIER_PREFIX).fieldpulse
+        INFOPLIST_FILE: iOS/Info.plist
+        CODE_SIGN_ENTITLEMENTS: iOS/FieldPulse.entitlements
+        TARGETED_DEVICE_FAMILY: "1,2"
+    dependencies:
+      - target: FieldPulseWatch
+  FieldPulseWatch:
+    type: application
+    platform: watchOS
+    sources:
+      - path: Shared
+      - path: Watch
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: $(PRODUCT_BUNDLE_IDENTIFIER_PREFIX).fieldpulse.watchkitapp
+        INFOPLIST_FILE: Watch/Info.plist
+        CODE_SIGN_ENTITLEMENTS: Watch/FieldPulseWatch.entitlements
+        WATCHOS_DEPLOYMENT_TARGET: "10.0"
+    dependencies:
+      - target: FieldPulseWidgets
+  FieldPulseWidgets:
+    type: app-extension
+    platform: watchOS
+    sources:
+      - path: Shared
+      - path: Widgets
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: $(PRODUCT_BUNDLE_IDENTIFIER_PREFIX).fieldpulse.watchkitapp.widgets
+        INFOPLIST_FILE: Widgets/Info.plist
+        CODE_SIGN_ENTITLEMENTS: Widgets/FieldPulseWidgets.entitlements
+        SKIP_INSTALL: YES
+    dependencies: []
+schemes:
+  FieldPulse:
+    build:
+      targets:
+        FieldPulse: all
+        FieldPulseWatch: all
+        FieldPulseWidgets: all
+    run:
+      config: Debug
+    archive:
+      config: Release

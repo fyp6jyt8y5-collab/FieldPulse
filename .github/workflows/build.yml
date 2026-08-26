@@ -1,0 +1,70 @@
+name: Build FieldPulse
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+jobs:
+  build-check:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install XcodeGen
+        run: brew install xcodegen
+      - name: Generate project
+        env:
+          PRODUCT_BUNDLE_IDENTIFIER_PREFIX: ${{ vars.PRODUCT_BUNDLE_IDENTIFIER_PREFIX || 'com.example' }}
+        run: xcodegen generate
+      - name: Compile iOS without signing
+        run: xcodebuild build -project FieldPulse.xcodeproj -scheme FieldPulse -destination 'generic/platform=iOS Simulator' CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO
+
+  archive:
+    if: ${{ vars.ENABLE_SIGNED_BUILD == 'true' }}
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install XcodeGen
+        run: brew install xcodegen
+      - name: Select installed Xcode
+        run: sudo xcode-select -s "$(ls -d /Applications/Xcode*.app | sort | tail -1)"
+      - name: Generate project
+        env:
+          PRODUCT_BUNDLE_IDENTIFIER_PREFIX: ${{ vars.PRODUCT_BUNDLE_IDENTIFIER_PREFIX || 'com.example' }}
+        run: xcodegen generate
+      - name: Import signing certificate
+        env:
+          CERTIFICATE_BASE64: ${{ secrets.APPLE_CERTIFICATE_BASE64 }}
+          CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+        run: |
+          CERTIFICATE_PATH=$RUNNER_TEMP/signing.p12
+          KEYCHAIN_PATH=$RUNNER_TEMP/build.keychain-db
+          echo -n "$CERTIFICATE_BASE64" | base64 --decode > "$CERTIFICATE_PATH"
+          security create-keychain -p "build" "$KEYCHAIN_PATH"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
+          security unlock-keychain -p "build" "$KEYCHAIN_PATH"
+          security import "$CERTIFICATE_PATH" -P "$CERTIFICATE_PASSWORD" -A -t cert -f pkcs12 -k "$KEYCHAIN_PATH"
+          security list-keychain -d user -s "$KEYCHAIN_PATH"
+      - name: Install provisioning profiles
+        env:
+          IOS_PROFILE_BASE64: ${{ secrets.IOS_PROFILE_BASE64 }}
+          WATCH_PROFILE_BASE64: ${{ secrets.WATCH_PROFILE_BASE64 }}
+        run: |
+          mkdir -p "$HOME/Library/MobileDevice/Provisioning Profiles"
+          echo -n "$IOS_PROFILE_BASE64" | base64 --decode > "$HOME/Library/MobileDevice/Provisioning Profiles/FieldPulse.mobileprovision"
+          echo -n "$WATCH_PROFILE_BASE64" | base64 --decode > "$HOME/Library/MobileDevice/Provisioning Profiles/FieldPulseWatch.mobileprovision"
+      - name: Archive
+        env:
+          TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          xcodebuild archive -project FieldPulse.xcodeproj -scheme FieldPulse -configuration Release -destination 'generic/platform=iOS' -archivePath "$RUNNER_TEMP/FieldPulse.xcarchive" DEVELOPMENT_TEAM="$TEAM_ID" CODE_SIGN_STYLE=Manual
+      - name: Export IPA
+        env:
+          EXPORT_OPTIONS_BASE64: ${{ secrets.EXPORT_OPTIONS_BASE64 }}
+        run: |
+          echo -n "$EXPORT_OPTIONS_BASE64" | base64 --decode > "$RUNNER_TEMP/ExportOptions.plist"
+          xcodebuild -exportArchive -archivePath "$RUNNER_TEMP/FieldPulse.xcarchive" -exportOptionsPlist "$RUNNER_TEMP/ExportOptions.plist" -exportPath "$RUNNER_TEMP/export"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: FieldPulse-iOS-archive
+          path: |
+            ${{ runner.temp }}/FieldPulse.xcarchive
+            ${{ runner.temp }}/export/*.ipa

@@ -22,7 +22,7 @@ jobs:
           xcodebuild build -project FieldPulse.xcodeproj -scheme FieldPulse -destination 'generic/platform=iOS Simulator' CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO 2>&1 | tee "$RUNNER_TEMP/build.log"
       - name: Upload build log
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: FieldPulse-build-log
           path: ${{ runner.temp }}/build.log
@@ -74,7 +74,7 @@ jobs:
         run: |
           echo -n "$EXPORT_OPTIONS_BASE64" | base64 --decode > "$RUNNER_TEMP/ExportOptions.plist"
           xcodebuild -exportArchive -archivePath "$RUNNER_TEMP/FieldPulse.xcarchive" -exportOptionsPlist "$RUNNER_TEMP/ExportOptions.plist" -exportPath "$RUNNER_TEMP/export"
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: FieldPulse-iOS-archive
           path: |

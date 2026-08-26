@@ -38,6 +38,11 @@ struct DashboardView: View {
                     } label: {
                         Label("Head Mouse", systemImage: "dot.scope")
                     }
+                    NavigationLink {
+                        RemoteScreenView()
+                    } label: {
+                        Label("Remote Screen", systemImage: "rectangle.inset.filled")
+                    }
                 }
                 if let error = location.errorMessage ?? weather.errorMessage { Section { Text(error).foregroundStyle(.red) } }
             }

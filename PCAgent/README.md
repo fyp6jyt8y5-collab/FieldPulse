@@ -17,11 +17,16 @@ Pour créer un exécutable autonome :
 dotnet publish -c Release
 ```
 
-3. Autorise `HeadMouseAgent.exe` sur le réseau privé dans le pare-feu Windows.
+3. Autorise les ports du serveur dans le pare-feu Windows :
+
+```powershell
+New-NetFirewallRule -DisplayName "FieldPulse Remote Screen" -Direction Inbound -Protocol TCP -LocalPort 8080 -Action Allow -Profile Private
+New-NetFirewallRule -DisplayName "FieldPulse Mouse" -Direction Inbound -Protocol UDP -LocalPort 45454 -Action Allow -Profile Private
+```
 4. Trouve l'adresse IP du PC avec `ipconfig`.
-5. Dans FieldPulse > Head Mouse, saisis cette adresse et le port `45454`.
-6. Active `Head tracking`.
+5. Dans FieldPulse > Remote Screen, saisis cette adresse et appuie sur `Connect`.
+6. Touche l'écran du PC pour déplacer la souris ; relâche après un glissement pour faire un clic gauche.
 
 L'iPhone et le PC doivent être sur le même Wi-Fi. Le serveur écoute uniquement le port UDP local ; ne redirige pas ce port vers Internet. Utilise un réseau privé de confiance.
 
-Si la console affiche `FieldPulse Head Mouse listening on UDP 45454`, l'agent est prêt. Garde cette fenêtre ouverte pendant l'utilisation.
+Si la console affiche `Mouse control listening on UDP 45454` et `Screen stream ready`, l'agent est prêt. Garde cette fenêtre ouverte pendant l'utilisation.

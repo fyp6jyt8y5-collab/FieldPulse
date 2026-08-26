@@ -10,5 +10,6 @@
 <key>CFBundlePackageType</key><string>APPL</string>
 <key>NSLocationWhenInUseUsageDescription</key><string>FieldPulse Head Mouse uses location only when requested for optional features.</string>
 <key>NSLocalNetworkUsageDescription</key><string>FieldPulse Head Mouse connects to your Windows PC on the local network.</string>
+<key>NSAppTransportSecurity</key><dict><key>NSAllowsArbitraryLoads</key><true/></dict>
 <key>UILaunchScreen</key><dict/>
 </dict></plist>

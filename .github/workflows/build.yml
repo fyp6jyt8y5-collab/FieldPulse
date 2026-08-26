@@ -16,10 +16,12 @@ jobs:
         env:
           PRODUCT_BUNDLE_IDENTIFIER_PREFIX: ${{ vars.PRODUCT_BUNDLE_IDENTIFIER_PREFIX || 'com.example' }}
         run: xcodegen generate
+      - name: Inspect generated project
+        run: xcodebuild -project FieldPulse.xcodeproj -list
       - name: Compile iOS without signing
         run: |
           set -o pipefail
-          xcodebuild build -project FieldPulse.xcodeproj -scheme FieldPulse -destination 'generic/platform=iOS Simulator' CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO 2>&1 | tee "$RUNNER_TEMP/build.log"
+          xcodebuild build -project FieldPulse.xcodeproj -scheme FieldPulse -destination 'generic/platform=iOS Simulator' CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO -verbose 2>&1 | tee "$RUNNER_TEMP/build.log"
       - name: Upload build log
         if: always()
         uses: actions/upload-artifact@v5

@@ -147,10 +147,7 @@ final class RemoteControlService: ObservableObject {
         previousPitch = nil
         motionManager.startDeviceMotionUpdates(using: .xArbitraryZVertical, to: motionQueue) { [weak self] motion, _ in
             guard let motion, let self else { return }
-            guard let reference = self.referenceAttitude ?? motion.attitude else {
-                self.referenceAttitude = motion.attitude
-                return
-            }
+            let reference = self.referenceAttitude ?? motion.attitude
             if self.referenceAttitude == nil { self.referenceAttitude = reference }
             let relative = motion.attitude.copy() as! CMAttitude
             relative.multiply(byInverseOf: reference)

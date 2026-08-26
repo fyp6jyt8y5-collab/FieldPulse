@@ -66,6 +66,7 @@ jobs:
           EXECUTABLE=$(/usr/libexec/PlistBuddy -c "Print :CFBundleExecutable" "$APP_DEST/Info.plist")
           test -x "$APP_DEST/$EXECUTABLE"
           /usr/libexec/PlistBuddy -c "Print :CFBundleIdentifier" "$APP_DEST/Info.plist"
+          /usr/libexec/PlistBuddy -c "Print :CFBundleDisplayName" "$APP_DEST/Info.plist"
           /usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" "$APP_DEST/Info.plist"
           /usr/libexec/PlistBuddy -c "Print :CFBundleVersion" "$APP_DEST/Info.plist"
           cd "$RUNNER_TEMP/ipa"

@@ -20,6 +20,7 @@ targets:
         excludes:
           - "**/*.plist"
           - "**/*.entitlements"
+          - "HeadMouseApp.swift"
     resources:
       - path: iOS/Resources
     settings:
@@ -39,6 +40,8 @@ targets:
         excludes:
           - "**/*.plist"
           - "**/*.entitlements"
+          - "FieldPulseApp.swift"
+          - "DashboardView.swift"
     settings:
       base:
         PRODUCT_NAME: FieldPulseHeadMouse

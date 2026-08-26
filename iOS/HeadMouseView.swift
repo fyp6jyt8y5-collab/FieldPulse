@@ -31,7 +31,7 @@ struct HeadMouseView: View {
                 Section { Text(error).foregroundStyle(.red) }
             }
         }
-        .navigationTitle("Head Mouse")
+        .navigationTitle("Head Mouse 2.0")
         .onDisappear { service.stop() }
     }
 }

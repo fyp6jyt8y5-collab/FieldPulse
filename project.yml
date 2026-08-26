@@ -45,7 +45,8 @@ targets:
     type: app-extension
     platform: watchOS
     sources:
-      - path: Shared
+      - path: Shared/AppData.swift
+      - path: Shared/SharedDataStore.swift
       - path: Widgets
     settings:
       base:

@@ -39,7 +39,7 @@ struct FieldPulseWidget: Widget {
         StaticConfiguration(kind: kind, provider: PulseProvider()) { entry in FieldPulseWidgetView(entry: entry) }
             .configurationDisplayName("FieldPulse")
             .description("Current time, weather, location and battery.")
-            .supportedFamilies([.accessoryCircular, .accessoryRectangular, .accessoryInline, .systemSmall, .systemMedium])
+            .supportedFamilies([.accessoryCircular, .accessoryRectangular, .accessoryInline])
     }
 }
 

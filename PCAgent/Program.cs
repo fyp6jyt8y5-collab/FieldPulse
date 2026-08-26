@@ -13,7 +13,7 @@ while (true)
     UdpReceiveResult result = await udp.ReceiveAsync();
     try
     {
-        MotionPacket? packet = JsonSerializer.Deserialize<MotionPacket>(result.Buffer);
+        MotionPacket? packet = JsonSerializer.Deserialize<MotionPacket>(result.Buffer, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
         if (packet is null) continue;
         Mouse.Move((int)(packet.Y * packet.Sensitivity * 18), (int)(packet.X * packet.Sensitivity * 18));
     }

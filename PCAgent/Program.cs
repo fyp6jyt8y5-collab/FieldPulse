@@ -1,6 +1,5 @@
 using System.Drawing;
 using System.Drawing.Imaging;
-using System.Net;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Text.Json;
@@ -31,21 +30,35 @@ static async Task RunMouseServer(int port)
 
 static async Task RunStreamServer(int port)
 {
-    HttpListener listener = new();
-    listener.Prefixes.Add($"http://+:{port}/");
+    TcpListener listener = new(System.Net.IPAddress.Any, port);
     listener.Start();
     Console.WriteLine($"Screen stream ready at http://PC-IP:{port}/stream");
     while (true)
     {
-        HttpListenerContext context = await listener.GetContextAsync();
-        if (context.Request.Url?.AbsolutePath != "/stream") { context.Response.StatusCode = 404; context.Response.Close(); continue; }
-        context.Response.ContentType = "multipart/x-mixed-replace; boundary=frame";
-        context.Response.SendChunked = true;
-        _ = Task.Run(async () => await StreamScreen(context.Response));
+        TcpClient client = await listener.AcceptTcpClientAsync();
+        _ = Task.Run(async () => await HandleStreamClient(client));
     }
 }
 
-static async Task StreamScreen(HttpListenerResponse response)
+static async Task HandleStreamClient(TcpClient client)
+{
+    using (client)
+    {
+        NetworkStream stream = client.GetStream();
+        byte[] requestBuffer = new byte[4096];
+        int bytesRead = await stream.ReadAsync(requestBuffer);
+        string request = System.Text.Encoding.ASCII.GetString(requestBuffer, 0, bytesRead);
+        if (!request.StartsWith("GET /stream ", StringComparison.Ordinal))
+        {
+            await stream.WriteAsync("HTTP/1.1 404 Not Found\r\nContent-Length: 0\r\n\r\n"u8.ToArray());
+            return;
+        }
+        await stream.WriteAsync("HTTP/1.1 200 OK\r\nCache-Control: no-cache\r\nConnection: close\r\nContent-Type: multipart/x-mixed-replace; boundary=frame\r\n\r\n"u8.ToArray());
+        await StreamScreen(stream);
+    }
+}
+
+static async Task StreamScreen(NetworkStream stream)
 {
     try
     {
@@ -57,14 +70,14 @@ static async Task StreamScreen(HttpListenerResponse response)
             bitmap.Save(image, ImageFormat.Jpeg);
             byte[] jpeg = image.ToArray();
             byte[] header = System.Text.Encoding.ASCII.GetBytes($"--frame\r\nContent-Type: image/jpeg\r\nContent-Length: {jpeg.Length}\r\n\r\n");
-            await response.OutputStream.WriteAsync(header);
-            await response.OutputStream.WriteAsync(jpeg);
-            await response.OutputStream.WriteAsync("\r\n"u8.ToArray());
-            await response.OutputStream.FlushAsync();
+            await stream.WriteAsync(header);
+            await stream.WriteAsync(jpeg);
+            await stream.WriteAsync("\r\n"u8.ToArray());
+            await stream.FlushAsync();
             await Task.Delay(100);
         }
     }
-    catch { response.Close(); }
+    catch { }
 }
 
 internal sealed record MousePacket(string Type, double Dx, double Dy);

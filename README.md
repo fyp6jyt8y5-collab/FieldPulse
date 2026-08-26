@@ -37,3 +37,5 @@ Cette version ne contient pas l’app Watch et doit être resignée par SideStor
 ## Head Mouse
 
 Le dossier `PCAgent` contient le compagnon Windows. Compile-le avec .NET 8, lance `HeadMouseAgent.exe`, autorise le réseau privé dans le pare-feu, puis saisis l’IP du PC dans **Head Mouse** sur l’iPhone. Le gyroscope envoie les mouvements à 60 Hz en UDP local et le PC les applique avec `SendInput`. Cette fonction contrôle la souris dans les jeux qui acceptent les entrées système ; certains jeux avec anti-triche peuvent refuser les entrées simulées.
+
+Le mode **Remote Screen** affiche le bureau en plein écran paysage. **Mode casque VR** affiche deux vues centrées pour les lentilles, **Panoramique** agrandit le cadrage et le suit avec le gyroscope, et **Souris gyro** envoie les mouvements de tête à Windows. Le tactile permet aussi de déplacer la souris et de faire un clic gauche.

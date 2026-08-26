@@ -49,6 +49,12 @@ jobs:
         run: |
           set -o pipefail
           xcodebuild build -project FieldPulse.xcodeproj -scheme FieldPulseSideload -sdk iphoneos -configuration Release CONFIGURATION_BUILD_DIR="$RUNNER_TEMP/device-build" CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO 2>&1 | tee "$RUNNER_TEMP/sidestore-build.log"
+      - name: Upload SideStore build log
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: FieldPulse-SideStore-build-log
+          path: ${{ runner.temp }}/sidestore-build.log
       - name: Package IPA
         run: |
           mkdir -p "$RUNNER_TEMP/ipa/Payload"

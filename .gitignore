@@ -4,4 +4,6 @@
 *.xcarchive
 DerivedData/
 .build/
+PCAgent/bin/
+PCAgent/obj/
 .env
